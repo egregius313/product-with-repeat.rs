@@ -20,16 +20,6 @@ pub struct Iter<'a, T> {
     /// The items used for the product
     items: &'a [T],
     /// The list of indices for the items being iterated over.
-    ///
-    /// # Examples
-    /// ```
-    /// let mut iter = Iter {
-    ///    items: [0, 1, 2, 3, 4, 5, 6],
-    ///    state: [2, 3],
-    ///    completed: false,
-    /// };
-    /// assert_eq!(iter.next(), Some(vec![&2, &3]));
-    /// ```
     state: Vec<usize>,
     /// Whether or not all items have been iterated over.
     completed: bool,
@@ -104,16 +94,6 @@ pub mod known_size {
         /// The items used for the product
         items: &'a [T],
         /// The list of indices for the items being iterated over.
-        ///
-        /// # Examples
-        /// ```
-        /// let mut iter = Iter {
-        ///    items: [0, 1, 2, 3, 4, 5, 6],
-        ///    state: [2, 3],
-        ///    completed: false,
-        /// };
-        /// assert_eq!(iter.next(), Some([&2, &3]));
-        /// ```
         state: [usize; REPEAT],
         /// Whether or not all items have been iterated over.
         completed: bool,
