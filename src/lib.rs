@@ -127,16 +127,7 @@ pub mod known_size {
                 return None;
             }
 
-            use std::mem::MaybeUninit;
-
-            let item: [&'a T; REPEAT] = {
-                let mut a = MaybeUninit::<[&'a T; REPEAT]>::zeroed();
-                for i in 0..REPEAT {
-                    let a = unsafe { a.assume_init_mut() };
-                    a[i] = &self.items[self.state[i]];
-                }
-                unsafe { a.assume_init() }
-            };
+            let item = std::array::from_fn(|i| &self.items[self.state[i]]);
 
             self.increment_state();
 
