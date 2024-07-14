@@ -75,12 +75,12 @@ pub mod known_size {
     use std::iter::FusedIterator;
 
     /// Create a cartesian product of a given length from a given iterable.
-    pub trait ProductWithRepeat<T, const REPEAT: usize> {
-        fn product_with_repeat(&self) -> Iter<T, REPEAT>;
+    pub trait ProductWithRepeat<T> {
+        fn product_with_repeat<const REPEAT: usize>(&self) -> Iter<T, REPEAT>;
     }
 
-    impl<T, A: AsRef<[T]>, const REPEAT: usize> ProductWithRepeat<T, REPEAT> for A {
-        fn product_with_repeat(&self) -> Iter<T, REPEAT> {
+    impl<T, A: AsRef<[T]>> ProductWithRepeat<T> for A {
+        fn product_with_repeat<const REPEAT: usize>(&self) -> Iter<T, REPEAT> {
             Iter {
                 items: self.as_ref(),
                 state: [0; REPEAT],
