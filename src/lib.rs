@@ -71,11 +71,22 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
 impl<T> FusedIterator for Iter<'_, T> {}
 
+/// Provides a `ProductWithRepeat` implementation for which the desired repeat
+/// size is known.
+///
+/// For example:
+///
+/// ```rust
+/// use product_with_repeat::known_size::ProductWithRepeat;
+///
+/// let potential_baseball_teams: [&Player; 26] = players.product_with_repeat::<26>().collect();
+/// ```
 pub mod known_size {
     use std::iter::FusedIterator;
 
     /// Create a cartesian product of a given length from a given iterable.
     pub trait ProductWithRepeat<T> {
+        /// `REPEAT` - the length of the desired n-tuples.
         fn product_with_repeat<const REPEAT: usize>(&self) -> Iter<T, REPEAT>;
     }
 
