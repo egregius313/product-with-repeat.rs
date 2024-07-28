@@ -137,3 +137,73 @@ pub mod known_size {
 
     impl<T, const R: usize> FusedIterator for Iter<'_, T, R> {}
 }
+
+/// Generate the Cartesian product of `N_ITS` collections.
+///
+/// The resulting iterator yields arrays containing items from the Cartesian
+/// product.
+pub fn product<'a, T, A: AsRef<[T]>, const N_ITS: usize>(
+    items: &'a [A; N_ITS],
+) -> Product<'a, T, A, N_ITS> {
+    Product {
+        items,
+        state: [0; N_ITS],
+        completed: false,
+        _t: std::marker::PhantomData,
+    }
+}
+
+/// Iterator representing the state of calculating a Cartesian product
+///
+/// Created by using the [`product`] function.
+///
+/// A `Product<'a, T, A: AsRef<[T]>, N_ITS>` will yield `[&'a T; N]` as an
+/// iterator.
+pub struct Product<'a, T, A: AsRef<[T]>, const N_ITS: usize> {
+    /// The iterators being iterated over to generate the cartesian product
+    items: &'a [A; N_ITS],
+    /// Indices for each iterable
+    state: [usize; N_ITS],
+    /// Whether or not the iterator has completed
+    completed: bool,
+    /// Necessary for indicating that the `&'a T` references will live long
+    /// enough.
+    _t: std::marker::PhantomData<&'a T>,
+}
+
+impl<'a, T, A: AsRef<[T]>, const N_ITS: usize> Iterator for Product<'a, T, A, N_ITS> {
+    type Item = [&'a T; N_ITS];
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.completed {
+            return None;
+        }
+
+        // For the state:  [i, j, k, ...]
+        // Yield the item: [&items[0][i], &items[1][j], &items[2][k], ...]
+        let item = std::array::from_fn(|i| &self.items[i].as_ref()[self.state[i]]);
+
+        // Had to inline the function due to lifetime issues :|
+        #[allow(unused_labels)]
+        'increment_state: {
+            let mut carry = true;
+            for (i, r) in self.state.iter_mut().enumerate().rev() {
+                // Increment current index
+                *r += 1;
+                if *r >= self.items[i].as_ref().len() {
+                    *r = 0;
+                } else {
+                    carry = false;
+                    break;
+                }
+            }
+            // If you would still need to carry, you have overflowed
+            let overflowed = carry;
+            self.completed = overflowed;
+        }
+
+        Some(item)
+    }
+}
+
+impl<'a, T, A: AsRef<[T]>, const N_ITS: usize> FusedIterator for Product<'a, T, A, N_ITS> {}
